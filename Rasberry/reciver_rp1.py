@@ -1,23 +1,32 @@
 import RPi.GPIO as GPIO
-from time import sleep
+import time
 
-flag = 1
-button_pin = 14 
+wait = 1
+reciver_pin = 14 
+clock_pin = 15
 GPIO.setmode(GPIO.BCM)
-
-GPIO.setup(button_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(reciver_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(clock_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.add_event_detect(clock_pin, GPIO.RISING)
 
 try:
     while True:
-   
-        if GPIO.input(button_pin) == GPIO.HIGH:
-                flag +=1
-                if flag % 2:
-                    print("hello")
-                else:
-                    print(" HELLO")
-        sleep(0.3)
-        
+        if GPIO.event_detected(clock_pin):
+            if GPIO.input(reciver_pin) == GPIO.HIGH:
+                print("1")
+                time.sleep(wait)
+                if GPIO.input(reciver_pin) == GPIO.HIGH:
+                    print("2")
+                    time.sleep(wait)
+                    if GPIO.input(reciver_pin) == GPIO.LOW:
+                        print("3")
+                        time.sleep(wait)
+                        if GPIO.input(reciver_pin) == GPIO.HIGH:
+                            print("4")
+                            time.sleep(wait)
+                            print("connect")
+                            
+                            
 except KeyboardInterrupt:
     print("Przerwano przez użytkownika")
 
