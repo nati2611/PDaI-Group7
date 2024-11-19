@@ -1,6 +1,6 @@
 import RPi.GPIO as GPIO
-
-wait = 1
+import time
+wait = 0.1
 reciving_pin = 14
 sending_pin = 18
 clock_pin = 15
@@ -35,19 +35,18 @@ try:
         if GPIO.event_detected(clock_pin):  # Synchronizacja z zegarem
             GPIO.output(sending_pin, GPIO.HIGH)
             print("1")
-            while not GPIO.event_detected(clock_pin):
-                pass
+            time.sleep(wait)
             GPIO.output(sending_pin, GPIO.HIGH)
             print("2")
-            while not GPIO.event_detected(clock_pin):
-                pass
+            time.sleep(wait)
             GPIO.output(sending_pin, GPIO.LOW)
             print("3")
-            while not GPIO.event_detected(clock_pin):
-                pass
+            time.sleep(wait)
             GPIO.output(sending_pin, GPIO.HIGH)
             print("4")
+            time.sleep(wait)
             break
+            
     
 
 except KeyboardInterrupt:
