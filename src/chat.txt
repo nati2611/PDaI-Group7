@@ -1,0 +1,1 @@
+Dies ist eine Nachricht, die in die Datei geschrieben wird.

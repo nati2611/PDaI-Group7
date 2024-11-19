@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>PDaI Group 7</title>
+    <link rel="stylesheet" href="styles.css" />
+
+</head>
+<body>
+    <header>
+        <h1>Welcome</h1>
+    </header>
+        <section id="handshake">
+            <h2>Handshake</h2>
+            <form id="handshakeForm">
+                <input type="text" id="usernameInput" placeholder="Enter your username..." required />
+                <button type="submit">Join</button>
+            </form>
+        </section>
+
+        <section id="chatContainer" class="hidden">
+            <div id="chatDisplay"></div> <!-- Chat messages will be displayed here -->
+            <form id="chatform">
+                <textarea id="messageInput" placeholder="Type a message..." required></textarea>
+                <button type="submit" id="sendButton">Send</button>
+            </form>
+            <button id="leaveButton">Leave</button>
+        </section>
+         
+    <script type="module" src="main.js"></script>
+</body>
+</html>
