@@ -43,6 +43,7 @@ handshakeForm.addEventListener("submit", event => {
 
   handshake.classList.add("hidden");
   chatContainer.classList.remove("hidden");
+  leaveButton.classList.remove("hidden");
 
   appendMessage(BOT_NAME, "left", "Hello " + name + "! How can I help you today?");
 });
@@ -50,6 +51,7 @@ handshakeForm.addEventListener("submit", event => {
 leaveButton.addEventListener("click", () => {
   chatContainer.classList.add("hidden");
   handshake.classList.remove("hidden");
+  leaveButton.classList.add("hidden");
   chatDisplay.innerHTML = "";
 });
 
