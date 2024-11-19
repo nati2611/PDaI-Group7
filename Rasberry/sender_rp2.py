@@ -2,7 +2,7 @@ import RPi.GPIO as GPIO
 import time
 import threading
 
-wait = 1
+wait = 0.1
 clock_pin = 15
 reciving_pin = 14
 sending_pin = 18
@@ -51,8 +51,9 @@ try:
             print("4")
             time.sleep(wait)
             break
+    GPIO.output(sending_pin, GPIO.LOW)
     while True:
-        if GPIO.event_detected(clock_pin):
+        if GPIO.event_detected(reciving_pin):
             if GPIO.input(reciving_pin) == GPIO.HIGH:
                 print("1")
                 time.sleep(wait)  
@@ -65,6 +66,7 @@ try:
                         if GPIO.input(reciving_pin) == GPIO.HIGH:
                             print("4")
                             print("connect")
+                            time.sleep(wait)
                             break
 
 except KeyboardInterrupt:
