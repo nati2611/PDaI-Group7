@@ -1,32 +1,55 @@
 import RPi.GPIO as GPIO
-import time
 
 wait = 1
-reciver_pin = 14 
+reciving_pin = 14
+sending_pin = 18
 clock_pin = 15
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(reciver_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(reciving_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(clock_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.add_event_detect(clock_pin, GPIO.RISING)
+GPIO.setup(sending_pin, GPIO.OUT)
+
+
+GPIO.add_event_detect(clock_pin, GPIO.BOTH)
 
 try:
     while True:
         if GPIO.event_detected(clock_pin):
-            if GPIO.input(reciver_pin) == GPIO.HIGH:
+            if GPIO.input(reciving_pin) == GPIO.HIGH:
                 print("1")
-                time.sleep(wait)
-                if GPIO.input(reciver_pin) == GPIO.HIGH:
+                while not GPIO.event_detected(clock_pin):
+                    pass  
+                if GPIO.input(reciving_pin) == GPIO.HIGH:
                     print("2")
-                    time.sleep(wait)
-                    if GPIO.input(reciver_pin) == GPIO.LOW:
+                    while not GPIO.event_detected(clock_pin):
+                        pass
+                    if GPIO.input(reciving_pin) == GPIO.LOW:
                         print("3")
-                        time.sleep(wait)
-                        if GPIO.input(reciver_pin) == GPIO.HIGH:
+                        while not GPIO.event_detected(clock_pin):
+                            pass
+                        if GPIO.input(reciving_pin) == GPIO.HIGH:
                             print("4")
-                            time.sleep(wait)
                             print("connect")
-                            
-                            
+                            break
+    while True:
+        if GPIO.event_detected(clock_pin):  # Synchronizacja z zegarem
+            GPIO.output(sending_pin, GPIO.HIGH)
+            print("1")
+            while not GPIO.event_detected(clock_pin):
+                pass
+            GPIO.output(sending_pin, GPIO.HIGH)
+            print("2")
+            while not GPIO.event_detected(clock_pin):
+                pass
+            GPIO.output(sending_pin, GPIO.LOW)
+            print("3")
+            while not GPIO.event_detected(clock_pin):
+                pass
+            GPIO.output(sending_pin, GPIO.HIGH)
+            print("4")
+            break
+    
+
 except KeyboardInterrupt:
     print("Przerwano przez użytkownika")
 
