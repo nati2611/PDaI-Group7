@@ -1,6 +1,10 @@
 const chatform = document.getElementById("chatform");
 const messageInput = document.getElementById("messageInput");
 const chatDisplay = document.getElementById("chatDisplay");
+const handshake = document.getElementById("handshake");
+const chatContainer = document.getElementById("chatContainer");
+const handshakeForm = document.getElementById("handshakeForm");
+const leaveButton = document.getElementById("leaveButton");
 
 const BOT_MSGS = [
   "Hi, how are you?",
@@ -27,7 +31,26 @@ chatform.addEventListener("submit", event => {
   botResponse();
 
   // Speichern der Nachricht als Textdatei
-  saveToFile(msgText);
+  //saveToFile(msgText);
+});
+
+// Event listener for the handshake form
+handshakeForm.addEventListener("submit", event => {
+  event.preventDefault();
+
+  const name = document.getElementById("usernameInput").value;
+  if (!name) return;
+
+  handshake.classList.add("hidden");
+  chatContainer.classList.remove("hidden");
+
+  appendMessage(BOT_NAME, "left", "Hello " + name + "! How can I help you today?");
+});
+
+leaveButton.addEventListener("click", () => {
+  chatContainer.classList.add("hidden");
+  handshake.classList.remove("hidden");
+  chatDisplay.innerHTML = "";
 });
 
 // Function to display messages in the chat area

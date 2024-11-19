@@ -21,6 +21,10 @@ main {
     width: 100%;
 }
 
+.hidden {
+    display: none;
+}
+
 #chatContainer {
     width: 50vh;
     max-width: 100%;
@@ -35,6 +39,11 @@ main {
     justify-content: space-between; /* Sorgt dafür, dass Inhalte oben und unten ausgerichtet sind */
     overflow: hidden;
 }
+
+#chatContainer.hidden {
+    display: none;
+}
+
 
 #chatDisplay {
     padding: 10px;
