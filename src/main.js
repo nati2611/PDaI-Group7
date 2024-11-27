@@ -5,6 +5,8 @@ const handshake = document.getElementById("handshake");
 const chatContainer = document.getElementById("chatContainer");
 const handshakeForm = document.getElementById("handshakeForm");
 const leaveButton = document.getElementById("leaveButton");
+const joinButton = document.getElementById("joinButton");
+const loading = document.getElementById("loading");
 
 const BOT_MSGS = [
   "Hi, how are you?",
@@ -35,21 +37,37 @@ chatform.addEventListener("submit", event => {
 });
 
 // Event listener for the handshake form
-handshakeForm.addEventListener("submit", event => {
+handshakeForm.addEventListener("submit", async event => {
   event.preventDefault();
 
-  const name = document.getElementById("usernameInput").value;
-  if (!name) return;
+  // Show the loading element
+  loading.classList.remove("hidden");
+  joinButton.classList.add("hidden");
 
-  handshake.classList.add("hidden");
-  chatContainer.classList.remove("hidden");
+  loading.innerHTML = `<img src='https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNmV6NzBtZnNjeXRkZzY4ZXlhdzJnazZnZzRtcGl2YzJrejA3aDJ1dyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/MDrmyLuEV8XFOe7lU6/giphy.gif'  
+    alt='Loading...' style='width:90%' />`;
 
-  appendMessage(BOT_NAME, "left", "Hello " + name + "! How can I help you today?");
+  // Delay for 5 seconds
+  setTimeout(() => {
+    // Hide handshake and loading screen
+    handshake.classList.add("hidden");
+    loading.classList.add("hidden");
+
+    // Show chat container
+    chatContainer.classList.remove("hidden");
+    leaveButton.classList.remove("hidden");
+
+    // Add welcome message
+    appendMessage(BOT_NAME, "left", "Hello " + name + "! How can I help you today?");
+  }, 5000);
 });
+
 
 leaveButton.addEventListener("click", () => {
   chatContainer.classList.add("hidden");
   handshake.classList.remove("hidden");
+  leaveButton.classList.add("hidden");
+  joinButton.classList.remove("hidden");
   chatDisplay.innerHTML = "";
 });
 

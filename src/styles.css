@@ -69,10 +69,19 @@ form {
     height: 40px;
 }
 
-#sendButton {
+#sendButton, #joinButton {
     padding: 5px 10px;
     border: none;
     background-color: #4caf50;
+    color: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#leaveButton {
+    padding: 5px 10px;
+    border: none;
+    background-color: #f44336;
     color: #fff;
     border-radius: 4px;
     cursor: pointer;
