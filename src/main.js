@@ -29,13 +29,15 @@ chatform.addEventListener("submit", event => {
   const msgText = messageInput.value;
   if (!msgText) return;
 
+  ws.on("connection", function connection(ws) {
 
-  ws.send(JSON.stringify({ type: "message", data: message }));
+    ws.send(JSON.stringify({ type: "message", data: msgText }));
 
-  addMessage(message);
+    addMessage(message);
 
-  appendMessage(PERSON_NAME, "right", msgText);
-  messageInput.value = "";
+    appendMessage(PERSON_NAME, "right", msgText);
+    messageInput.value = "";
+    });
 
   botResponse();
 
