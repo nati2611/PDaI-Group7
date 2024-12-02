@@ -13,9 +13,14 @@ function write(text){
     });
 } */
 
-/*const app = require('express')();
-const http = require('http').Server(app);
-const io = require('socket.io')(http);
+import express from 'express';
+import { Server } from 'http';
+import { Server as SocketIOServer } from 'socket.io';
+
+const app = express();
+const http = new Server(app);
+const io = new SocketIOServer(http);
+    
 
 io.on('connection', function(socket) {
   console.log('A user connected.');
@@ -37,9 +42,9 @@ io.on('connection', function(socket) {
 const PORT = process.env.PORT || 3000;
 http.listen(PORT, function() {
   console.log(`Server listening on port ${PORT}`);
-}); */
+}); 
 
-import { createServer } from 'node:http';
+/*import { createServer } from 'node:http';
 
 const hostname = '127.0.0.1';
 const port = 3000;
@@ -53,3 +58,4 @@ const server = createServer((req, res) => {
 server.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`);
 });
+*/

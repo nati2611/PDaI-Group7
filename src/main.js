@@ -19,6 +19,8 @@ const BOT_MSGS = [
 // Icons for the bot and the user
 const BOT_NAME = "Bot";
 const PERSON_NAME = "You";
+const ws = new WebSocket('ws://localhost:5500');
+
 
 // Event listener for submitting messages
 chatform.addEventListener("submit", event => {
@@ -26,6 +28,11 @@ chatform.addEventListener("submit", event => {
 
   const msgText = messageInput.value;
   if (!msgText) return;
+
+
+  ws.send(JSON.stringify({ type: "message", data: message }));
+
+  addMessage(message);
 
   appendMessage(PERSON_NAME, "right", msgText);
   messageInput.value = "";
@@ -35,6 +42,17 @@ chatform.addEventListener("submit", event => {
   // Speichern der Nachricht als Textdatei
   //saveToFile(msgText);
 });
+
+function addMessage(message) {
+  const node = document.createElement("div");
+  const text = document.createTextNode(message);
+
+  node.appendChild(text);
+  node.classList.add("msg", "right-msg");
+
+  document.getElementById("chatDisplay").appendChild(node);
+  
+}
 
 // Event listener for the handshake form
 handshakeForm.addEventListener("submit", async event => {
@@ -127,4 +145,4 @@ function formatDate(date) {
 
 function random(min, max) {
   return Math.floor(Math.random() * (max - min) + min);
-}
+} 
