@@ -8,17 +8,16 @@ const leaveButton = document.getElementById("leaveButton");
 const joinButton = document.getElementById("joinButton");
 const loading = document.getElementById("loading");
 
-const BOT_MSGS = [
-  "Hi, how are you?",
-  "Ohh... I can't understand what you're trying to say. Sorry!",
-  "I like to play games... But I don't know how to play!",
-  "Sorry if my answers are not relevant. :))",
-  "I feel sleepy! :("
-];
-
-// Icons for the bot and the user
 const BOT_NAME = "Bot";
 const PERSON_NAME = "You";
+const ws = new WebSocket('ws://localhost:3000'); // Updated port
+
+ws.onmessage = (event) => {
+  const { type, data } = JSON.parse(event.data);
+  if (type === "message") {
+    appendMessage(BOT_NAME, "left", data); // Display bot's response
+  }
+};
 
 // Event listener for submitting messages
 chatform.addEventListener("submit", event => {
@@ -27,16 +26,11 @@ chatform.addEventListener("submit", event => {
   const msgText = messageInput.value;
   if (!msgText) return;
 
+  ws.send(JSON.stringify({ type: "message", data: msgText })); // Send message to server
   appendMessage(PERSON_NAME, "right", msgText);
   messageInput.value = "";
-
-  botResponse();
-
-  // Speichern der Nachricht als Textdatei
-  //saveToFile(msgText);
 });
 
-// Event listener for the handshake form
 handshakeForm.addEventListener("submit", async event => {
   event.preventDefault();
 
@@ -71,7 +65,6 @@ leaveButton.addEventListener("click", () => {
   chatDisplay.innerHTML = "";
 });
 
-// Function to display messages in the chat area
 function appendMessage(name, side, text) {
   const msgHTML = `
     <div class="msg ${side}-msg">
@@ -85,46 +78,11 @@ function appendMessage(name, side, text) {
 
   chatDisplay.insertAdjacentHTML("beforeend", msgHTML);
   chatDisplay.scrollTop = chatDisplay.scrollHeight;
-  
 }
 
-// Funktion zum Speichern der Nachricht als Datei
-function saveToFile(message) {
-  // Erstelle einen Blob mit dem Textinhalt
-  const blob = new Blob([message], { type: 'text/plain' });
-  
-  // Erstelle eine URL für den Blob
-  const url = URL.createObjectURL(blob);
-  
-  // Erstelle ein Link-Element, das die Datei zum Download anbietet
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'chat.txt';  // Der Dateiname
-  document.body.appendChild(a);
-  a.click();  // Simuliere einen Klick, um den Download zu starten
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);  // Aufräumen der URL
-}
-
-// Function to simulate a bot response with a random delay
-function botResponse() {
-  const randomIndex = random(0, BOT_MSGS.length - 1);
-  const msgText = BOT_MSGS[randomIndex];
-  const delay = msgText.split(" ").length * 100;
-
-  setTimeout(() => {
-    appendMessage(BOT_NAME, "left", msgText);
-  }, delay);
-}
-
-// Utility functions
+// Utility function
 function formatDate(date) {
   const h = "0" + date.getHours();
   const m = "0" + date.getMinutes();
-
   return `${h.slice(-2)}:${m.slice(-2)}`;
-}
-
-function random(min, max) {
-  return Math.floor(Math.random() * (max - min) + min);
 }
