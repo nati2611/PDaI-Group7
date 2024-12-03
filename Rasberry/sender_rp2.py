@@ -2,7 +2,8 @@ import RPi.GPIO as GPIO
 import time
 import threading
 
-wait = 0.06
+clock_freq = 0.06
+safety_clock_freq= 0.0005
 reciving_pin = 14
 sending_pin = 15
 
@@ -15,35 +16,35 @@ def listen_for_data():
     recived= ""
     flag = False
     while True:
-        time.sleep(0.001)
+        time.sleep(safety_clock_freq)
         if GPIO.event_detected(reciving_pin):
             if GPIO.input(reciving_pin) == GPIO.HIGH:
-                time.sleep(wait)  
+                time.sleep(clock_freq)  
                 if GPIO.input(reciving_pin) == GPIO.LOW:
-                    time.sleep(wait)
+                    time.sleep(clock_freq)
                     if GPIO.input(reciving_pin) == GPIO.HIGH:
-                        time.sleep(wait)
+                        time.sleep(clock_freq)
                         if GPIO.input(reciving_pin) == GPIO.HIGH:
-                            time.sleep(wait)
+                            time.sleep(clock_freq)
                             if GPIO.input(reciving_pin) == GPIO.HIGH:
-                                time.sleep(wait)
+                                time.sleep(clock_freq)
                                 if GPIO.input(reciving_pin) == GPIO.LOW:
-                                    time.sleep(wait)
+                                    time.sleep(clock_freq)
                                     if GPIO.input(reciving_pin) == GPIO.HIGH:
-                                        time.sleep(wait)
+                                        time.sleep(clock_freq)
                                         if GPIO.input(reciving_pin) == GPIO.HIGH:
-                                            time.sleep(wait)
+                                            time.sleep(clock_freq)
                                             if GPIO.input(reciving_pin) == GPIO.HIGH:
-                                                time.sleep(wait)
+                                                time.sleep(clock_freq)
                                                 while True:
                                                     if GPIO.input(reciving_pin) == GPIO.HIGH:
                                                         recived = recived + "1"
                                                         print("recived..",recived )
-                                                        time.sleep(wait)     
+                                                        time.sleep(clock_freq)     
                                                     else:
                                                         recived = recived + "0"
                                                         print("recived..", recived)
-                                                        time.sleep(wait)
+                                                        time.sleep(clock_freq)
                                                     if recived.endswith("101110111") and len(recived) > 9:
                                                         flag = True
                                                         break
@@ -53,35 +54,34 @@ def listen_for_data():
                 recived = ""
                 flag = False
                 GPIO.event_detected(reciving_pin)
-    print("thread stoped")
 
 
 
 try:
-    time.sleep(wait)
+    time.sleep(clock_freq)
     while True:
         GPIO.output(sending_pin, GPIO.HIGH)
-        time.sleep(wait)
+        time.sleep(clock_freq)
         GPIO.output(sending_pin, GPIO.HIGH)
-        time.sleep(wait)
+        time.sleep(clock_freq)
         GPIO.output(sending_pin, GPIO.LOW)
-        time.sleep(wait)
+        time.sleep(clock_freq)
         GPIO.output(sending_pin, GPIO.HIGH)
-        time.sleep(wait)
+        time.sleep(clock_freq)
         break
     GPIO.output(sending_pin, GPIO.LOW)
     while True:
-        time.sleep(0.001)
+        time.sleep(safety_clock_freq)
         if GPIO.event_detected(reciving_pin):
             if GPIO.input(reciving_pin) == GPIO.HIGH:
-                time.sleep(wait)  
+                time.sleep(clock_freq)  
                 if GPIO.input(reciving_pin) == GPIO.HIGH:
-                    time.sleep(wait)
+                    time.sleep(clock_freq)
                     if GPIO.input(reciving_pin) == GPIO.LOW:
-                        time.sleep(wait)
+                        time.sleep(clock_freq)
                         if GPIO.input(reciving_pin) == GPIO.HIGH:
                             print("connect")
-                            time.sleep(wait)
+                            time.sleep(clock_freq)
                             listener_thread = threading.Thread(target=listen_for_data, daemon=True)
                             listener_thread.start()
                             break
@@ -94,34 +94,34 @@ try:
     while True:
         input_user= input()
         GPIO.output(sending_pin, GPIO.HIGH)
-        time.sleep(wait)
+        time.sleep(clock_freq)
         GPIO.output(sending_pin, GPIO.LOW)
-        time.sleep(wait)
+        time.sleep(clock_freq)
         GPIO.output(sending_pin, GPIO.HIGH)
-        time.sleep(wait*4)
+        time.sleep(clock_freq*4)
         GPIO.output(sending_pin, GPIO.LOW)
-        time.sleep(wait)
+        time.sleep(clock_freq)
         GPIO.output(sending_pin, GPIO.HIGH)
-        time.sleep(wait*3)
+        time.sleep(clock_freq*3)
         for i in input_user:
             if i == '0':
                 GPIO.output(sending_pin, GPIO.LOW)
-                time.sleep(wait)
+                time.sleep(clock_freq)
             if i == '1':
                 GPIO.output(sending_pin, GPIO.HIGH)
-                time.sleep(wait)
+                time.sleep(clock_freq)
         GPIO.output(sending_pin, GPIO.HIGH)
-        time.sleep(wait)
+        time.sleep(clock_freq)
         GPIO.output(sending_pin, GPIO.LOW)
-        time.sleep(wait)
+        time.sleep(clock_freq)
         GPIO.output(sending_pin, GPIO.HIGH)
-        time.sleep(wait*4)
+        time.sleep(clock_freq*4)
         GPIO.output(sending_pin, GPIO.LOW)
-        time.sleep(wait)
+        time.sleep(clock_freq)
         GPIO.output(sending_pin, GPIO.HIGH)
-        time.sleep(wait*3)
+        time.sleep(clock_freq*3)
         GPIO.output(sending_pin, GPIO.LOW)
-        time.sleep(wait)
+        time.sleep(clock_freq)
         print("stop")
 
 except KeyboardInterrupt:
