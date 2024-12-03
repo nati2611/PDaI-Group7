@@ -78,7 +78,7 @@ try:
         break
     GPIO.output(sending_pin, GPIO.LOW)
     time.sleep(0.1)
-    if GPIO.event_detected(reciving_pin):
+    if GPIO.event_detected(reciving_pin): #event detection has to stay
         print("reciving...")
     sender_thread = threading.Thread(target=send_data, daemon=True)
     sender_thread.start()
