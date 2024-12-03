@@ -2,7 +2,8 @@ import RPi.GPIO as GPIO
 import time
 import threading
 
-wait = 0.06
+clock_freq = 0.06
+safety_clock_freq = 0.0005
 reciving_pin = 14
 sending_pin = 15
 
@@ -17,64 +18,63 @@ def send_data():
     while True:
         input_user= input()
         GPIO.output(sending_pin, GPIO.HIGH)
-        time.sleep(wait)
+        time.sleep(clock_freq)
         GPIO.output(sending_pin, GPIO.LOW)
-        time.sleep(wait)
+        time.sleep(clock_freq)
         GPIO.output(sending_pin, GPIO.HIGH)
-        time.sleep(wait*3)
+        time.sleep(clock_freq*3)
         GPIO.output(sending_pin, GPIO.LOW)
-        time.sleep(wait)
+        time.sleep(clock_freq)
         GPIO.output(sending_pin, GPIO.HIGH)
-        time.sleep(wait*3)
+        time.sleep(clock_freq*3)
         for i in input_user:
             if i == '0':
                 GPIO.output(sending_pin, GPIO.LOW)
-                time.sleep(wait)
+                time.sleep(clock_freq)
             else:
                 GPIO.output(sending_pin, GPIO.HIGH)
-                time.sleep(wait)
+                time.sleep(clock_freq)
         print("stop")
         GPIO.output(sending_pin, GPIO.HIGH)
-        time.sleep(wait)
+        time.sleep(clock_freq)
         GPIO.output(sending_pin, GPIO.LOW)
-        time.sleep(wait)
+        time.sleep(clock_freq)
         GPIO.output(sending_pin, GPIO.HIGH)
-        time.sleep(wait*3)
+        time.sleep(clock_freq*3)
         GPIO.output(sending_pin, GPIO.LOW)
-        time.sleep(wait)
+        time.sleep(clock_freq)
         GPIO.output(sending_pin, GPIO.HIGH)
-        time.sleep(wait*3)
+        time.sleep(clock_freq*3)
         GPIO.output(sending_pin, GPIO.LOW)
     
-    print("thread stoped")
         
 
 
 recived= ""
 try:
     while True:
-        time.sleep(0.001)
+        time.sleep(safety_clock_freq)
         if GPIO.event_detected(reciving_pin):
             if GPIO.input(reciving_pin) == GPIO.HIGH:
-                time.sleep(wait)  
+                time.sleep(clock_freq)  
                 if GPIO.input(reciving_pin) == GPIO.HIGH:
-                    time.sleep(wait)
+                    time.sleep(clock_freq)
                     if GPIO.input(reciving_pin) == GPIO.LOW:
-                        time.sleep(wait)
+                        time.sleep(clock_freq)
                         if GPIO.input(reciving_pin) == GPIO.HIGH:
                             print("connect")
                             break
                             
-    time.sleep(wait)
+    time.sleep(clock_freq)
     while True:
         GPIO.output(sending_pin, GPIO.HIGH)
-        time.sleep(wait)
+        time.sleep(clock_freq)
         GPIO.output(sending_pin, GPIO.HIGH)
-        time.sleep(wait)
+        time.sleep(clock_freq)
         GPIO.output(sending_pin, GPIO.LOW)
-        time.sleep(wait)
+        time.sleep(clock_freq)
         GPIO.output(sending_pin, GPIO.HIGH)
-        time.sleep(wait)
+        time.sleep(clock_freq)
         break
     GPIO.output(sending_pin, GPIO.LOW)
     time.sleep(0.1)
@@ -90,37 +90,37 @@ try:
     '''reciver message code 101110111   - 98'''
 
     while True:
-        time.sleep(0.001)
+        time.sleep(safety_clock_freq)
         if GPIO.event_detected(reciving_pin):
             if GPIO.input(reciving_pin) == GPIO.HIGH:
-                time.sleep(wait)  
+                time.sleep(clock_freq)  
                 if GPIO.input(reciving_pin) == GPIO.LOW:
-                    time.sleep(wait)
+                    time.sleep(clock_freq)
                     if GPIO.input(reciving_pin) == GPIO.HIGH:
-                        time.sleep(wait)
+                        time.sleep(clock_freq)
                         if GPIO.input(reciving_pin) == GPIO.HIGH:
-                            time.sleep(wait)
+                            time.sleep(clock_freq)
                             if GPIO.input(reciving_pin) == GPIO.HIGH:
-                                time.sleep(wait)
+                                time.sleep(clock_freq)
                                 if GPIO.input(reciving_pin) == GPIO.HIGH:
-                                    time.sleep(wait)
+                                    time.sleep(clock_freq)
                                     if GPIO.input(reciving_pin) == GPIO.LOW:
-                                        time.sleep(wait)
+                                        time.sleep(clock_freq)
                                         if GPIO.input(reciving_pin) == GPIO.HIGH:
-                                            time.sleep(wait)
+                                            time.sleep(clock_freq)
                                             if GPIO.input(reciving_pin) == GPIO.HIGH:
-                                                time.sleep(wait)
+                                                time.sleep(clock_freq)
                                                 if GPIO.input(reciving_pin) == GPIO.HIGH:
-                                                    time.sleep(wait)
+                                                    time.sleep(clock_freq)
                                                     while True:
                                                         if GPIO.input(reciving_pin) == GPIO.HIGH:
                                                             recived = recived + "1"
                                                             print("recived..",recived )
-                                                            time.sleep(wait)     
+                                                            time.sleep(clock_freq)     
                                                         else:
                                                             recived = recived + "0"
                                                             print("recived..", recived)
-                                                            time.sleep(wait)
+                                                            time.sleep(clock_freq)
                                                         if recived.endswith("1011110111") and len(recived) > 10:
                                                             flag = True
                                                             break
