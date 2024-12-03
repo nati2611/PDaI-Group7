@@ -16,21 +16,35 @@ function write(text){
 
     import WebSocket, { WebSocketServer } from "ws";
 
-    const wss = new WebSocketServer({ port: 3000 });
-    
-    wss.on("connection", function connection(ws) {
-      ws.on("message", function message(message) {
-        const data = JSON.parse(message);
-    
-        if (data.type === "message") {
-          wss.clients.forEach((client) => {
-            if (client !== ws && client.readyState === WebSocket.OPEN) {
-              client.send(JSON.stringify({ type: "message", data: data.data }));
-            }
-          });
+const BOT_MSGS = [
+  "Hi, how are you?",
+  "Ohh... I can't understand what you're trying to say. Sorry!",
+  "I like to play games... But I don't know how to play!",
+  "Sorry if my answers are not relevant. :))",
+  "I feel sleepy! :("
+];
+
+const wss = new WebSocketServer({ port: 3000 });
+
+wss.on("connection", function connection(ws) {
+  ws.on("message", function message(message) {
+    const data = JSON.parse(message);
+
+    if (data.type === "message") {
+      // Broadcast user message to other clients
+      wss.clients.forEach((client) => {
+        if (client !== ws && client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify({ type: "message", data: data.data }));
         }
       });
-    });
+
+      // Respond as the bot
+      const botMessage = BOT_MSGS[Math.floor(Math.random() * BOT_MSGS.length)];
+      ws.send(JSON.stringify({ type: "message", data: botMessage }));
+    }
+  });
+});
+
 
 /*import express from 'express';
 import { Server } from 'http';
