@@ -1,21 +1,27 @@
 const chatform = document.getElementById("chatform");
 const messageInput = document.getElementById("messageInput");
 const chatDisplay = document.getElementById("chatDisplay");
+const typingIndicator = document.getElementById("typingIndicator"); // Add an element for showing typing
 const handshake = document.getElementById("handshake");
 const chatContainer = document.getElementById("chatContainer");
 const handshakeForm = document.getElementById("handshakeForm");
 const leaveButton = document.getElementById("leaveButton");
 const joinButton = document.getElementById("joinButton");
 const loading = document.getElementById("loading");
-
 const BOT_NAME = "Bot";
 const PERSON_NAME = "You";
-const ws = new WebSocket('ws://localhost:3000'); // Updated port
+const ws = new WebSocket('ws://localhost:3000');
 
+let typingTimeout;
+
+// Event listener for incoming WebSocket messages
 ws.onmessage = (event) => {
-  const { type, data } = JSON.parse(event.data);
+  const { type, data, user } = JSON.parse(event.data);
+
   if (type === "message") {
-    appendMessage(BOT_NAME, "left", data); // Display bot's response
+    appendMessage(user || BOT_NAME, "left", data);
+  } else if (type === "typing") {
+    showTypingIndicator(user);
   }
 };
 
@@ -26,11 +32,19 @@ chatform.addEventListener("submit", event => {
   const msgText = messageInput.value;
   if (!msgText) return;
 
-  ws.send(JSON.stringify({ type: "message", data: msgText })); // Send message to server
+  ws.send(JSON.stringify({ type: "message", data: msgText, user: PERSON_NAME }));
   appendMessage(PERSON_NAME, "right", msgText);
   messageInput.value = "";
 });
 
+// Event listener for input changes to detect typing
+messageInput.addEventListener("input", () => {
+  ws.send(JSON.stringify({ type: "typing", user: PERSON_NAME }));
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(() => {
+    ws.send(JSON.stringify({ type: "typing", user: null })); // Clear typing indicator after timeout
+  }, 1000);
+});
 handshakeForm.addEventListener("submit", async event => {
   event.preventDefault();
 
@@ -63,8 +77,18 @@ leaveButton.addEventListener("click", () => {
   leaveButton.classList.add("hidden");
   joinButton.classList.remove("hidden");
   chatDisplay.innerHTML = "";
-});
+}); 
 
+// Function to display typing indicator
+function showTypingIndicator(user) {
+  if (user) {
+    typingIndicator.textContent = `${user} is typing...`;
+  } else {
+    typingIndicator.textContent = "";
+  }
+}
+
+// Function to append chat messages
 function appendMessage(name, side, text) {
   const msgHTML = `
     <div class="msg ${side}-msg">
@@ -80,7 +104,7 @@ function appendMessage(name, side, text) {
   chatDisplay.scrollTop = chatDisplay.scrollHeight;
 }
 
-// Utility function
+// Utility function to format the date
 function formatDate(date) {
   const h = "0" + date.getHours();
   const m = "0" + date.getMinutes();
