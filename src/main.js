@@ -20,7 +20,7 @@ ws.onmessage = (event) => {
 
   if (type === "message") {
     // Determine sender name based on the user field
-    const senderName = user === client1_name ? client1_name : client2_name;
+    const senderName = user === client1_name ? client2_name : client1_name;
     const messageSide = senderName === client1_name ? "right" : "left";
     appendMessage(senderName, messageSide, data);
   } else if (type === "typing") {
@@ -42,7 +42,7 @@ chatform.addEventListener("submit", (event) => {
 
 // Event listener for input changes to detect typing
 messageInput.addEventListener("input", () => {
-  ws.send(JSON.stringify({ type: "typing", user: client1_name })); // Notify server of typing
+  ws.send(JSON.stringify({ type: "typing", user: client2_name })); // Notify server of typing
   clearTimeout(typingTimeout);
   typingTimeout = setTimeout(() => {
     ws.send(JSON.stringify({ type: "typing", user: null })); // Clear typing indicator after timeout
