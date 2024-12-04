@@ -8,9 +8,9 @@ const handshakeForm = document.getElementById("handshakeForm");
 const leaveButton = document.getElementById("leaveButton");
 const joinButton = document.getElementById("joinButton");
 const loading = document.getElementById("loading");
-const BOT_NAME = "Bot";
-const PERSON_NAME = "You";
-const ws = new WebSocket('ws://localhost:3000');
+const client1_name = "You"; // Your client's name
+const client2_name = "Other client"; // Other clients' name
+const ws = new WebSocket("ws://localhost:3000");
 
 let typingTimeout;
 
@@ -19,33 +19,38 @@ ws.onmessage = (event) => {
   const { type, data, user } = JSON.parse(event.data);
 
   if (type === "message") {
-    appendMessage(user || BOT_NAME, "left", data);
+    // Determine sender name based on the user field
+    const senderName = user === client1_name ? client1_name : client2_name;
+    const messageSide = senderName === client1_name ? "right" : "left";
+    appendMessage(senderName, messageSide, data);
   } else if (type === "typing") {
     showTypingIndicator(user);
   }
 };
 
 // Event listener for submitting messages
-chatform.addEventListener("submit", event => {
+chatform.addEventListener("submit", (event) => {
   event.preventDefault();
 
   const msgText = messageInput.value;
   if (!msgText) return;
 
-  ws.send(JSON.stringify({ type: "message", data: msgText, user: PERSON_NAME }));
-  appendMessage(PERSON_NAME, "right", msgText);
+  ws.send(JSON.stringify({ type: "message", data: msgText, user: client1_name }));
+  appendMessage(client1_name, "right", msgText);
   messageInput.value = "";
 });
 
 // Event listener for input changes to detect typing
 messageInput.addEventListener("input", () => {
-  ws.send(JSON.stringify({ type: "typing", user: PERSON_NAME }));
+  ws.send(JSON.stringify({ type: "typing", user: client1_name })); // Notify server of typing
   clearTimeout(typingTimeout);
   typingTimeout = setTimeout(() => {
     ws.send(JSON.stringify({ type: "typing", user: null })); // Clear typing indicator after timeout
   }, 1000);
 });
-handshakeForm.addEventListener("submit", async event => {
+
+// Handshake join form submission
+handshakeForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   // Show the loading element
@@ -66,18 +71,18 @@ handshakeForm.addEventListener("submit", async event => {
     leaveButton.classList.remove("hidden");
 
     // Add welcome message
-    appendMessage(BOT_NAME, "left", "Hello " + name + "! How can I help you today?");
+    appendMessage(client2_name, "left", "Hello! How can I help you today?");
   }, 5000);
 });
 
-
+// Leave button logic
 leaveButton.addEventListener("click", () => {
   chatContainer.classList.add("hidden");
   handshake.classList.remove("hidden");
   leaveButton.classList.add("hidden");
   joinButton.classList.remove("hidden");
   chatDisplay.innerHTML = "";
-}); 
+});
 
 // Function to display typing indicator
 function showTypingIndicator(user) {
