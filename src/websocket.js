@@ -1,4 +1,4 @@
-const ws = new WebSocket('ws://localhost:3000');
+/*const ws = new WebSocket('ws://localhost:3000');
 
 ws.addEventListener("message", function(event) {
     const data = JSON.parse(event.data);
@@ -31,4 +31,4 @@ function addMessage(message) {
     document.getElementById("chatDisplay").appendChild(node);
     
 
-}
+} */

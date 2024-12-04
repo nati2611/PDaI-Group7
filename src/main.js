@@ -1,37 +1,56 @@
 const chatform = document.getElementById("chatform");
 const messageInput = document.getElementById("messageInput");
 const chatDisplay = document.getElementById("chatDisplay");
+const typingIndicator = document.getElementById("typingIndicator"); // Add an element for showing typing
 const handshake = document.getElementById("handshake");
 const chatContainer = document.getElementById("chatContainer");
 const handshakeForm = document.getElementById("handshakeForm");
 const leaveButton = document.getElementById("leaveButton");
 const joinButton = document.getElementById("joinButton");
 const loading = document.getElementById("loading");
+const client1_name = "You"; // Your client's name
+const client2_name = "Other client"; // Other clients' name
+const ws = new WebSocket("ws://localhost:3000");
 
-const BOT_NAME = "Bot";
-const PERSON_NAME = "You";
-const ws = new WebSocket('ws://localhost:3000'); // Updated port
+let typingTimeout;
 
+// Event listener for incoming WebSocket messages
 ws.onmessage = (event) => {
-  const { type, data } = JSON.parse(event.data);
+  const { type, data, user } = JSON.parse(event.data);
+
   if (type === "message") {
-    appendMessage(BOT_NAME, "left", data); // Display bot's response
+    // Determine sender name based on the user field
+    const senderName = user === client1_name ? client2_name : client1_name;
+    const messageSide = senderName === client1_name ? "right" : "left";
+    appendMessage(senderName, messageSide, data);
+  } else if (type === "typing") {
+    showTypingIndicator(user);
   }
 };
 
 // Event listener for submitting messages
-chatform.addEventListener("submit", event => {
+chatform.addEventListener("submit", (event) => {
   event.preventDefault();
 
   const msgText = messageInput.value;
   if (!msgText) return;
 
-  ws.send(JSON.stringify({ type: "message", data: msgText })); // Send message to server
-  appendMessage(PERSON_NAME, "right", msgText);
+  ws.send(JSON.stringify({ type: "message", data: msgText, user: client1_name }));
+  appendMessage(client1_name, "right", msgText);
   messageInput.value = "";
 });
 
-handshakeForm.addEventListener("submit", async event => {
+// Event listener for input changes to detect typing
+messageInput.addEventListener("input", () => {
+  ws.send(JSON.stringify({ type: "typing", user: client2_name })); // Notify server of typing
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(() => {
+    ws.send(JSON.stringify({ type: "typing", user: null })); // Clear typing indicator after timeout
+  }, 1000);
+});
+
+// Handshake join form submission
+handshakeForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   // Show the loading element
@@ -52,11 +71,11 @@ handshakeForm.addEventListener("submit", async event => {
     leaveButton.classList.remove("hidden");
 
     // Add welcome message
-    appendMessage(BOT_NAME, "left", "Hello " + name + "! How can I help you today?");
+    appendMessage(client2_name, "left", "Hello! How can I help you today?");
   }, 5000);
 });
 
-
+// Leave button logic
 leaveButton.addEventListener("click", () => {
   chatContainer.classList.add("hidden");
   handshake.classList.remove("hidden");
@@ -65,6 +84,16 @@ leaveButton.addEventListener("click", () => {
   chatDisplay.innerHTML = "";
 });
 
+// Function to display typing indicator
+function showTypingIndicator(user) {
+  if (user) {
+    typingIndicator.textContent = `${user} is typing...`;
+  } else {
+    typingIndicator.textContent = "";
+  }
+}
+
+// Function to append chat messages
 function appendMessage(name, side, text) {
   const msgHTML = `
     <div class="msg ${side}-msg">
@@ -80,7 +109,7 @@ function appendMessage(name, side, text) {
   chatDisplay.scrollTop = chatDisplay.scrollHeight;
 }
 
-// Utility function
+// Utility function to format the date
 function formatDate(date) {
   const h = "0" + date.getHours();
   const m = "0" + date.getMinutes();
