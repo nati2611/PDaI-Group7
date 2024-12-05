@@ -1,5 +1,7 @@
 import os
 
+""" This script is used to prepare files to calculate statistic according to Huffman coding"""
+
 char_to_number = {
     **{chr(i): i - 96 for i in range(97, 123)},  # a-z (1-26)
     **{chr(i): i - 38 for i in range(65, 91)},  # A-Z (27-52)
@@ -8,12 +10,12 @@ char_to_number = {
 }
 
 def convert_char_to_number(char):
-    """Konwertuje znak na dwucyfrową liczbę według klucza."""
+    """Converts char into two number digit long according to key."""
     number = char_to_number.get(char, 0)
     return f"{number:02d}"
 
 def process_file(input_path, output_path):
-    """Przetwarza plik tekstowy, konwertując znaki na liczby i zapisując wynik."""
+    """Works on txt file, sends chars to  zapisując wynik."""
     with open(input_path, 'r', encoding='utf-8') as infile:
         content = infile.read()
     

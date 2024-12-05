@@ -40,10 +40,10 @@ huffman_code = {
     '9': '10111'
 }
 
-data = "1234567890"
+data = "999"
 
 encoded = huffman_encode(data, huffman_code)
-print("Zakodowane dane:", encoded)
+print("Encoded data:", encoded)
 
 decoded = huffman_decode(encoded, huffman_code)
-print("Odkodowane dane:", decoded)
+print("Decoded data:", decoded)
