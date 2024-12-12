@@ -1,17 +1,89 @@
 import RPi.GPIO as GPIO
 import time
 import threading
-# import huf_fun_lib
+import json
+import tornado.web
+from tornado.websocket import WebSocketHandler
+import tornado.platform.asyncio
+import asyncio
 
+# Constants
 clock_freq = 0.06
 safety_clock_freq = 0.0005
 reciving_pin = 14
 sending_pin = 15
 
+# Setup GPIO
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(reciving_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(sending_pin, GPIO.OUT)
 GPIO.add_event_detect(reciving_pin, GPIO.BOTH)
+
+# List of connected clients
+connected_clients = set()
+
+
+class MyWebSocketHandler(WebSocketHandler):
+    def check_origin(self, origin):
+        return True
+
+    def open(self):
+        print("Client connected")
+        connected_clients.add(self)
+
+    def on_message(self, message):
+        # print("Received message:", message)
+        data = json.loads(message)
+        msg_type = data.get("type")
+        user = data.get("user")
+        msg_data = data.get("data")
+
+        if msg_type == "message":
+            # Determine sender and broadcast the message
+            print(msg_data)
+            huf_input(msg_data)
+            # self.write_message(json.dumps({ "type": "message", "user": "Server", "data": msg_data}))
+
+        elif msg_type == "typing":
+            # Broadcast typing indicator
+            print("typing")
+        # Uncomment to send a response back to the client
+        # self.write_message(json.dumps({ "type": "message", "user": "Server", "data": "Hello from server"}))
+    
+    def send_mess(self):
+        self.write_message(json.dumps({ "type": "message", "user": "Other client", "data": "Hello from server"}))
+
+    def on_close(self):
+        print("Client disconnected")
+        connected_clients.discard(self)
+
+# Start the WebSocket server
+async def start_tornado_server():
+    """Start the Tornado WebSocket server."""
+    print("Starting Tornado WebSocket server...")
+    
+    # Integrate Tornado with asyncio
+    tornado.platform.asyncio.AsyncIOMainLoop().install()
+
+    # Create the Tornado application
+    app = tornado.web.Application([
+        (r"/websocket", MyWebSocketHandler),
+    ])
+    app.listen(8888)
+    print("WebSocket server started on ws://localhost:8888/websocket")
+
+    # Keep the server running
+    await asyncio.Future()  # Equivalent to running forever
+
+def broadcast_message(message):
+    for client in connected_clients:
+        if not client.ws_connection or not client.ws_connection.stream.socket:
+            # Skip closed connections
+            continue
+        try:
+            client.write_message(message)
+        except Exception as e:
+            print(f"Error sending message to client: {e}")
 
 def huffman_encode(data, huffman_code):
     if not data:
@@ -86,92 +158,56 @@ def conv_string(encoded_string):
     return ''.join(decoded_chars)
     
 
-def huf_input():
-    inpt = input()
+def huf_input(inpt):
+    # inpt = input()
+    print("huf input")
     converted_input = ''.join(convert_char_to_number(char) for char in inpt)
     encoded = huffman_encode(converted_input, huffman_code)
-    return encoded
+    send_data(encoded)
 
 def huf_output(output):
     decoded_output = huffman_decode(output, huffman_code)
     converted_output = conv_string(decoded_output)
+    # WebSocketHandler.write_message(converted_output)
+    broadcast_message(json.dumps({ "type": "message", "user": "Other client", "data": converted_output}))
     return converted_output
 
-def send_data():
-    while True:
-        input_user= huf_input()
-        GPIO.output(sending_pin, GPIO.HIGH)
-        time.sleep(clock_freq)
-        GPIO.output(sending_pin, GPIO.LOW)
-        time.sleep(clock_freq)
-        GPIO.output(sending_pin, GPIO.HIGH)
-        time.sleep(clock_freq*3)
-        GPIO.output(sending_pin, GPIO.LOW)
-        time.sleep(clock_freq)
-        GPIO.output(sending_pin, GPIO.HIGH)
-        time.sleep(clock_freq*3)
-        for i in input_user:
-            if i == '0':
-                GPIO.output(sending_pin, GPIO.LOW)
-                time.sleep(clock_freq)
-            else:
-                GPIO.output(sending_pin, GPIO.HIGH)
-                time.sleep(clock_freq)
-        print("stop")
-        GPIO.output(sending_pin, GPIO.HIGH)
-        time.sleep(clock_freq)
-        GPIO.output(sending_pin, GPIO.LOW)
-        time.sleep(clock_freq)
-        GPIO.output(sending_pin, GPIO.HIGH)
-        time.sleep(clock_freq*3)
-        GPIO.output(sending_pin, GPIO.LOW)
-        time.sleep(clock_freq)
-        GPIO.output(sending_pin, GPIO.HIGH)
-        time.sleep(clock_freq*3)
-        GPIO.output(sending_pin, GPIO.LOW)
-    
-        
-
-
-recived= ""
-try:
-    while True:
-        time.sleep(safety_clock_freq)
-        if GPIO.event_detected(reciving_pin):
-            if GPIO.input(reciving_pin) == GPIO.HIGH:
-                time.sleep(clock_freq)  
-                if GPIO.input(reciving_pin) == GPIO.HIGH:
-                    time.sleep(clock_freq)
-                    if GPIO.input(reciving_pin) == GPIO.LOW:
-                        time.sleep(clock_freq)
-                        if GPIO.input(reciving_pin) == GPIO.HIGH:
-                            print("connect")
-                            break
-                            
+def send_data(input_user):
+    # input_user= huf_input()
+    GPIO.output(sending_pin, GPIO.HIGH)
     time.sleep(clock_freq)
-    while True:
-        GPIO.output(sending_pin, GPIO.HIGH)
-        time.sleep(clock_freq)
-        GPIO.output(sending_pin, GPIO.HIGH)
-        time.sleep(clock_freq)
-        GPIO.output(sending_pin, GPIO.LOW)
-        time.sleep(clock_freq)
-        GPIO.output(sending_pin, GPIO.HIGH)
-        time.sleep(clock_freq)
-        break
     GPIO.output(sending_pin, GPIO.LOW)
-    time.sleep(0.1)
-    if GPIO.event_detected(reciving_pin): #event detection has to stay
-        print("reciving...")
-    sender_thread = threading.Thread(target=send_data, daemon=True)
-    sender_thread.start()
+    time.sleep(clock_freq)
+    GPIO.output(sending_pin, GPIO.HIGH)
+    time.sleep(clock_freq*3)
+    GPIO.output(sending_pin, GPIO.LOW)
+    time.sleep(clock_freq)
+    GPIO.output(sending_pin, GPIO.HIGH)
+    time.sleep(clock_freq*3)
+    for i in input_user:
+        if i == '0':
+            GPIO.output(sending_pin, GPIO.LOW)
+            time.sleep(clock_freq)
+        else:
+            GPIO.output(sending_pin, GPIO.HIGH)
+            time.sleep(clock_freq)
+    print("stop")
+    GPIO.output(sending_pin, GPIO.HIGH)
+    time.sleep(clock_freq)
+    GPIO.output(sending_pin, GPIO.LOW)
+    time.sleep(clock_freq)
+    GPIO.output(sending_pin, GPIO.HIGH)
+    time.sleep(clock_freq*3)
+    GPIO.output(sending_pin, GPIO.LOW)
+    time.sleep(clock_freq)
+    GPIO.output(sending_pin, GPIO.HIGH)
+    time.sleep(clock_freq*3)
+    GPIO.output(sending_pin, GPIO.LOW)
 
-    
+
+def listen_for_data():
+    recived= ""
     flag = False
-    
-    '''sender message code  1011110111  - 99 (if in code numbers above and including 80 appear the system won't work)'''
-    '''reciver message code 101110111   - 98'''
-
     while True:
         time.sleep(safety_clock_freq)
         if GPIO.event_detected(reciving_pin):
@@ -213,6 +249,55 @@ try:
             recived = ""
             flag = False
             GPIO.event_detected(reciving_pin)
+
+
+try:
+    while True:
+        time.sleep(safety_clock_freq)
+        if GPIO.event_detected(reciving_pin):
+            if GPIO.input(reciving_pin) == GPIO.HIGH:
+                time.sleep(clock_freq)  
+                if GPIO.input(reciving_pin) == GPIO.HIGH:
+                    time.sleep(clock_freq)
+                    if GPIO.input(reciving_pin) == GPIO.LOW:
+                        time.sleep(clock_freq)
+                        if GPIO.input(reciving_pin) == GPIO.HIGH:
+                            print("connect")
+                            break
+
+                            
+    time.sleep(clock_freq)
+    while True:
+        GPIO.output(sending_pin, GPIO.HIGH)
+        time.sleep(clock_freq)
+        GPIO.output(sending_pin, GPIO.HIGH)
+        time.sleep(clock_freq)
+        GPIO.output(sending_pin, GPIO.LOW)
+        time.sleep(clock_freq)
+        GPIO.output(sending_pin, GPIO.HIGH)
+        time.sleep(clock_freq)
+        break
+    GPIO.output(sending_pin, GPIO.LOW)
+    time.sleep(0.1)
+    if GPIO.event_detected(reciving_pin): #event detection has to stay
+        print("reciving...")
+
+    listener_thread = threading.Thread(target=listen_for_data, daemon=True)
+    listener_thread.start()
+
+    asyncio.run(start_tornado_server())
+
+    # sender_thread = threading.Thread(target=send_data, daemon=True)
+    # sender_thread.start()
+
+    # websocket_thread = threading.Thread(target=asyncio.run(start_tornado_server()), daemon=True)
+    # websocket_thread.start()
+
+    
+    '''sender message code  1011110111  - 99 (if in code numbers above and including 80 appear the system won't work)'''
+    '''reciver message code 101110111   - 98'''
+
+    
 
 except KeyboardInterrupt:
     print("^ end")
